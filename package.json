@@ -1,0 +1,19 @@
+{
+  "name": "426finalproject",
+  "version": "1.0.0",
+  "description": "Repo for Sean McCaffery and Miller Meares' 426 Final Project",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sean1000444/426FinalProject.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sean1000444/426FinalProject/issues"
+  },
+  "homepage": "https://github.com/sean1000444/426FinalProject#readme"
+}

@@ -14,9 +14,13 @@
     <body>
         <div id="root">
             Home Page <br>
-            <a href="searchResultsPage.html">Submit Search Link</a> <br>
-            <a href="accountInfoPage.html">Account Info Page Link</a> <br>
-            <a href="index.html">Logout Link</a> <br>
+            <div>Logged In User: <span id="logged-in"></span></div>
+            <form>
+                <input type="text" placeholder="Search"> <br>
+            </form>
+            <button id="search-button">Submit</button> <br>
+            <button id="account-info-button">Account Info</button> <br>
+            <button id="logout-button">Logout</button> <br>
         </div>
 
         <!-- Include links to JavaScript files below -->

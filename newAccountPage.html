@@ -14,8 +14,28 @@
     <body>
         <div id="root">
             New Account Page<br>
-            <a href="index.html">Back to Login Link</a><br>
-            <a href="homePage.html">Submit Info and go to Home Page Link</a><br>
+            <div>Logged In User: <span id="logged-in"></span></div>
+            <form>
+                <input type="text" placeholder="Name"><br>
+                <input type="text" placeholder="Email"><br>
+                <input type="text" placeholder="Password"><br>
+                <select name="Grade">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                </select><br>
+                <select name="Subject">
+                    <option value="math">Math</option>
+                    <option value="science">Science</option>
+                </select><br>
+            </form>
+            <button id="submit-new-account-info" type="submit">Create New Account</button> <br>
+            <button id="back-to-login-page" type="submit">Go Back to Login Page</button>
         </div>
 
         <!-- Include links to JavaScript files below -->

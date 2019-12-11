@@ -16,7 +16,8 @@ async function goToLoginPage(event) {
         "<button id=\"submit-login-info\">Submit</button>" +
         "</div>" +
         "<button id=\"create-new-account\">Create New Account</button>" +
-        "<p>" + jwt + "</p>"
+        "<p>Currently logged in user: " + jwt + "</p>" +
+        "<button id=\"available-movies-button\">See Available Movies Sample</button>"
     );
 }
 
@@ -30,28 +31,66 @@ function goToSearchResultsPage(event) {
     );
 }
 
-function goToAccountInfoPage() {
+async function seeAvailableMovies() {
+    const availableMoviesResult = await axios ({
+        method: 'get',
+        url: 'http://localhost:3000/public/movies'
+    })
+
+    let availableMovies = availableMoviesResult['data']['result'].slice(0, 11);
+    console.log(availableMovies)
+
+    availableMovies.forEach(movie => {
+        $("#root").append(
+            "<div>" + movie + "</div>"
+        )
+    });
+}
+
+async function goToAccountInfoPage() {
+    auth = "Bearer " + jwt
+    
+    const userRatingsKeys = await axios ({
+        method: 'get',
+        url: 'http://localhost:3000/user/movies/', 
+        headers: { Authorization: auth }
+    })
+    const userRatings = await axios ({
+        method: 'get',
+        url: 'http://localhost:3000/user/movies', 
+        headers: { Authorization: auth }
+    })
+    let userRatingsInfo = userRatings['data']['result']
+    let userRatingsKeysInfo = userRatingsKeys['data']['result']
+    console.log(userRatingsInfo);
+    console.log(userRatingsKeys);
+
     $("#root").empty().append(
         "Account Info Page<br>" +
         "<p>Current User: " + first + " " + last + "<\p>" +
         "<button id=\"back-to-home-button\">Back to Home Page</button><br>"
     );
+
+    $("#root").append(
+        "Your ratings: <br>"
+    )
+
+    userRatingsKeysInfo.forEach(key => {
+        $("#root").append(
+            key + ": " + userRatingsInfo[key]['rating'] + "<br>"
+        )
+    });
 }
 
 function goToHomePage() {
     $("#root").empty().append(
         "Home Page <br>" +
-        "<form>" +
-        "<input id=\"search-bar\" type=\"text\" placeholder=\"Search\"> <br>" +
-        "</form>" +
-        "<button id=\"search-button\">Submit</button> <br>" +
-        "<form>" +
-        "<input id=nameInput type=\"text\" placeholder=\"Name\">" +
-        "<input id=ratingInput type=\"text\" placeholder=\"Rating\">" +
-        "</form>" +
-        "<button id=\"submit-rating-button\">Submit</button> <br>" +
+        "<button id=\"submit-rating-button\">Submit Rating</button> <br>" +
+        "<button id=\"see-average-rating-button\">See Average Rating</button> <br>" +
         "<button id=\"account-info-button\">Account Info</button> <br>" +
-        "<button id=\"logout-button\">Logout</button> <br>"
+        "<button id=\"logout-button\">Logout</button> <br>" +
+        "<input id=\"search-bar\" type=\"text\" placeholder=\"Search\">" +
+        "<button id=\"search-button\">Submit</button> <br>"
     );
     var countries = movieData;
     
@@ -98,7 +137,6 @@ async function submitLoginInfo(event) {
             'pass': pass
         }
     })
-    console.log(result)
     jwt = result["data"]["jwt"]
     first = result["data"]["data"]["first"]
     last = result["data"]["data"]["last"]
@@ -134,29 +172,57 @@ function submitSearch(event) {
 }
 
 async function submitRating(event) {
-    // Get the info from the event
-    movieName = ""
-    movieRating = ""
+    movieName = "The Shawshank Redemption" // Get the info from the thing being rated
+    movieRating = 5
+    auth = "Bearer " + jwt
+
     // Update user's info
     const userResult = await axios ({
         method: 'post',
-        url: 'http://localhost:3000/user/movies/movieName', 
+        url: 'http://localhost:3000/user/movies/' + movieName, 
         data: {
-            rating: movieRating,
+            data: {
+                rating: movieRating
+            }
         },
-        headers: { Authorization: `Bearer ${jwt}` }
+        headers: { Authorization: auth }
     })
-    console.log(userResult);
-    
+
     // Update private's info
+    // First get what is currently there (bc merge isn't working)
+    const privateMovieRatingsReturn = await axios ({
+        method: 'get',
+        url: 'http://localhost:3000/private/movies/' + movieName + '/ratings', 
+        headers: { Authorization: auth }
+    })
+    privateMovieRatingsArray = privateMovieRatingsReturn['data']['result'];
+    
+    // Then update the value with the new information
+    privateMovieRatingsArray[privateMovieRatingsArray.length] = movieRating;
     const privateResult = await axios ({
         method: 'post',
-        url: 'http://localhost:3000/private/movies/movieName/ratings', 
-        data: [movieRating],
-        type: "merge",
-        headers: { Authorization: `Bearer ${jwt}` }
+        url: 'http://localhost:3000/private/movies/' + movieName + '/ratings', 
+        data: {
+            "data": privateMovieRatingsArray
+        },
+        headers: { Authorization: auth }
     })
-    console.log(privateResult);
+}
+
+async function seeAverageRating(event) {
+    movieName = "The Shawshank Redemption" // Get the info from the thing being rated
+    auth = "Bearer " + jwt
+
+    // First get what is currently there (bc merge isn't working)
+    const privateMovieRatingsReturn = await axios ({
+        method: 'get',
+        url: 'http://localhost:3000/private/movies/' + movieName + '/ratings', 
+        headers: { Authorization: auth }
+    })
+    privateMovieRatingsArray = privateMovieRatingsReturn['data']['result'];
+    let averageRating = privateMovieRatingsArray.reduce((total, num) => total + num) / privateMovieRatingsArray.length
+    $("#see-average-rating-button").parent().append("Average Rating: " + averageRating)
+    console.log()
 }
 
 function submitSearch(event) {
@@ -166,6 +232,8 @@ function submitSearch(event) {
 
 function logout(event) {
     jwt = "Logged Out";
+    first = "";
+    last = "";
     goToLoginPage();
 }
 
@@ -177,9 +245,12 @@ $(function () {
     first = "";
     last = "";
 
+    goToLoginPage();
+
     // Login page
     $root.on("click", "#submit-login-info", submitLoginInfo);
     $root.on("click", "#create-new-account", goToCreateNewAccountPage);
+    $root.on("click", "#available-movies-button", seeAvailableMovies);
 
     //New account page
     $root.on("click", "#submit-new-account-info", submitNewAccountInfo);
@@ -188,13 +259,10 @@ $(function () {
     // Home page
     $root.on("click", "#search-button", submitSearch);
     $root.on("click", "#submit-rating-button", submitRating);
+    $root.on("click", "#see-average-rating-button", seeAverageRating);
     $root.on("click", "#account-info-button", goToAccountInfoPage);
     $root.on("click", "#logout-button", logout);
 
     // Account Info and Search Results pages
     $root.on("click", "#back-to-home-button", goToHomePage);
-
-    // Search Results page
-    //     Deal with however I'm going to do these results
-
 }) 

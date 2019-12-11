@@ -81,37 +81,39 @@ async function seeAvailableMovies() {
 
 async function goToAccountInfoPage() {
     auth = "Bearer " + jwt
-    
-    const userRatingsKeys = await axios ({
-        method: 'get',
-        url: 'http://localhost:3000/user/movies/', 
-        headers: { Authorization: auth }
-    })
-    const userRatings = await axios ({
-        method: 'get',
-        url: 'http://localhost:3000/user/movies', 
-        headers: { Authorization: auth }
-    })
-    let userRatingsInfo = userRatings['data']['result']
-    let userRatingsKeysInfo = userRatingsKeys['data']['result']
-    console.log(userRatingsInfo);
-    console.log(userRatingsKeys);
 
     $("#root").empty().append(
         "Account Info Page<br>" +
         "<p>Current User: " + first + " " + last + "<\p>" +
         "<button id=\"back-to-home-button\">Back to Home Page</button><br>"
     );
+    
+    try {
+        const userRatingsKeys = await axios ({
+            method: 'get',
+            url: 'http://localhost:3000/user/movies/', 
+            headers: { Authorization: auth }
+        })
+        const userRatings = await axios ({
+            method: 'get',
+            url: 'http://localhost:3000/user/movies', 
+            headers: { Authorization: auth }
+        })
+        let userRatingsInfo = userRatings['data']['result']
+        let userRatingsKeysInfo = userRatingsKeys['data']['result']
 
-    $("#root").append(
-        "Your ratings: <br>"
-    )
-
-    userRatingsKeysInfo.forEach(key => {
         $("#root").append(
-            key + ": " + userRatingsInfo[key]['rating'] + "<br>"
+            "Your ratings: <br>"
         )
-    });
+
+        userRatingsKeysInfo.forEach(key => {
+            $("#root").append(
+                key + ": " + userRatingsInfo[key]['rating'] + "<br>"
+            )
+        });
+    } catch {
+        console.log("There are no ratings for this account yet")
+    }
 }
 
 function goToHomePage() {
@@ -159,19 +161,26 @@ async function submitLoginInfo(event) {
     // Check against DB to see if these are correct
     username = $("#username-field").val();
     pass = $("#password-field").val();
-    const result = await axios ({
-        method: 'post',
-        url: 'http://localhost:3000/account/login', 
-        data: {
-            'name': username,
-            'pass': pass
+    try {
+        const result = await axios ({
+            method: 'post',
+            url: 'http://localhost:3000/account/login', 
+            data: {
+                'name': username,
+                'pass': pass
+            }
+        })
+        jwt = result["data"]["jwt"]
+        first = result["data"]["data"]["first"]
+        last = result["data"]["data"]["last"]
+        goToHomePage();
+    } catch {
+        if ($("#root").find("#incorrectPass").length == 0) {
+            $(".login-container").append(
+                "<div id=\"incorrectPass\">Incorrect username or password</div>"
+            )
         }
-    })
-    jwt = result["data"]["jwt"]
-    first = result["data"]["data"]["first"]
-    last = result["data"]["data"]["last"]
-    // If so, transfer to new page
-    goToHomePage();
+    }
 }
 
 async function submitNewAccountInfo(event) {
@@ -192,7 +201,6 @@ async function submitNewAccountInfo(event) {
             }
         }
     })
-    console.log(result);
     goToLoginPage();
 }
 
@@ -289,7 +297,7 @@ async function getResults(input) {
 };
 
 async function submitSearch(event) {
-    // Used for deleting items
+    // Utility function for deleting items
     // auth = "Bearer " + jwt
     // const result = await axios ({
     //     method: 'delete',

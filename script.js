@@ -21,10 +21,33 @@ async function goToLoginPage(event) {
     );
 }
 
+//<img src = ${result.Poster} - this is the code to add the image. For some reason, it was covering up the input field.
+let ctr;
+const renderResultWidget = function (result) {
+    // search result widget - needs to contain name of movie, year?, and pic
+    let search_result = `<div class = "resultbox" id = "${result.Title}">
+    <p class=\"resultTitle\">${result.Title} - ${result.Year}</p>
+    <input class=\"rating-input\" type=\"text\" placeholder=\"0 to 5\">
+    <button class=\"rating-button\" id = "${ctr}">Submit</button>
+    <button class=\"see-average-rating-button\">See Average Rating</button> <br>
+    </div>`;
+    // console.log(ctr);
+    ctr++;
+    return search_result;
+}
+
+const renderAllResults = function (result) {
+    ctr = 0;
+    result.forEach(function (element) {
+        $('#root').append(renderResultWidget(element));
+    })
+}
+
 function goToSearchResultsPage(event, results) {
     // results should be a promise. Event included to grab user id?
     $("#root").empty().append(
         '<h2>Search Results</h2>' + 
+        '<button id=\"back-to-home-button\">Back to Home Page</button><br>' +
         '<br>'
     );
     results.then(result => {
@@ -33,25 +56,6 @@ function goToSearchResultsPage(event, results) {
         // event handlers for things involving the results.
         $(document).on('click', '.rating-button', submitRating);
     })
-}
-let ctr;
-const renderAllResults = function (result) {
-    ctr = 0;
-    result.forEach(function (element) {
-        $('#root').append(renderResultWidget(element));
-    })
-}
-//<img src = ${result.Poster} - this is the code to add the image. For some reason, it was covering up the input field.
-const renderResultWidget = function (result) {
-    // search result widget - needs to contain name of movie, year?, and pic
-    let search_result = `<div class = "resultbox" id = "${result.Title}">
-    <p>${result.Title} - ${result.Year}</p>
-    <input class=\"rating-input\" type=\"text\" placeholder=\"0 to 5\">
-    <button class=\"rating-button\" id = "${ctr}">Submit</button> <br>
-</div>`;
-console.log(ctr);
-    ctr++;
-    return search_result;
 }
 
 async function seeAvailableMovies() {
@@ -63,11 +67,16 @@ async function seeAvailableMovies() {
     let availableMovies = availableMoviesResult['data']['result'].slice(0, 11);
     console.log(availableMovies)
 
-    availableMovies.forEach(movie => {
+    if ($("#root").find("#movieContainer").length == 0) {
         $("#root").append(
-            "<div>" + movie + "</div>"
+            "<div id=\"movieContainer\"></div>"
         )
-    });
+        availableMovies.forEach(movie => {
+            $("#movieContainer").append(
+                "<div>" + movie + "</div>"
+            )
+        });
+    }
 }
 
 async function goToAccountInfoPage() {
@@ -108,8 +117,6 @@ async function goToAccountInfoPage() {
 function goToHomePage() {
     $("#root").empty().append(
         "Home Page <br>" +
-        "<button id=\"submit-rating-button\">Submit Rating</button> <br>" +
-        "<button id=\"see-average-rating-button\">See Average Rating</button> <br>" +
         "<button id=\"account-info-button\">Account Info</button> <br>" +
         "<button id=\"logout-button\">Logout</button> <br>" +
         "<input id=\"search-bar\" type=\"text\" placeholder=\"Search\">" +
@@ -193,10 +200,10 @@ async function submitNewAccountInfo(event) {
 
 async function submitRating(event) {
     let idnum = $(event.target).attr('id');
-    console.log(idnum);
+    // console.log(idnum);
     movieName = $(event.target).closest(".resultbox").attr('id'); // the id associated with each result is the movie name. Can change if need
     console.log(movieName);
-    movieRating = document.getElementsByClassName('rating-input')[idnum].value;
+    movieRating = parseInt(document.getElementsByClassName('rating-input')[idnum].value);
     console.log(movieRating);
     auth = "Bearer " + jwt
 
@@ -214,13 +221,18 @@ async function submitRating(event) {
 
     // Update private's info
     // First get what is currently there (bc merge isn't working)
-    const privateMovieRatingsReturn = await axios ({
-        method: 'get',
-        url: 'http://localhost:3000/private/movies/' + movieName + '/ratings', 
-        headers: { Authorization: auth }
-    })
-    privateMovieRatingsArray = privateMovieRatingsReturn['data']['result'];
-    
+    try {
+        const privateMovieRatingsReturn = await axios ({
+            method: 'get',
+            url: 'http://localhost:3000/private/movies/' + movieName + '/ratings', 
+            headers: { Authorization: auth }
+        })
+        privateMovieRatingsArray = privateMovieRatingsReturn['data']['result'];
+    } catch (error) {
+        console.log("Ignore that last GET error, it was handled")
+        privateMovieRatingsArray = []
+    }
+        
     // Then update the value with the new information
     privateMovieRatingsArray[privateMovieRatingsArray.length] = movieRating;
     const privateResult = await axios ({
@@ -234,22 +246,62 @@ async function submitRating(event) {
 }
 
 async function seeAverageRating(event) {
-    movieName = "The Shawshank Redemption" // Get the info from the thing being rated
+    movieName = $ ( event.target ).closest(".resultbox").attr('id') // Get the info from the thing being rated
+    console.log(movieName)
     auth = "Bearer " + jwt
 
     // First get what is currently there (bc merge isn't working)
-    const privateMovieRatingsReturn = await axios ({
-        method: 'get',
-        url: 'http://localhost:3000/private/movies/' + movieName + '/ratings', 
-        headers: { Authorization: auth }
-    })
-    privateMovieRatingsArray = privateMovieRatingsReturn['data']['result'];
-    let averageRating = privateMovieRatingsArray.reduce((total, num) => total + num) / privateMovieRatingsArray.length
-    $("#see-average-rating-button").parent().append("Average Rating: " + averageRating)
-    console.log()
+    let averageRating;
+    try {
+        const privateMovieRatingsReturn = await axios ({
+            method: 'get',
+            url: 'http://localhost:3000/private/movies/' + movieName + '/ratings', 
+            headers: { Authorization: auth }
+        })
+        privateMovieRatingsArray = privateMovieRatingsReturn['data']['result'];
+        averageRating = (privateMovieRatingsArray.reduce((total, num) => total + num) / privateMovieRatingsArray.length).toFixed(2)
+    } catch (error) {
+        console.log("Ignore that last GET error, it was handled")
+        averageRating = "There are no ratings for this movie yet"
+    }
+
+    if ($ ( event.target ).parent().find(".avgRating").length == 0) {
+        $ ( event.target ).parent().append("<p class=\"avgRating\">Average Rating: " + averageRating + "</p>")
+    } else {
+        $ ( event.target ).parent().find(".avgRating").empty().append("<p class=\"avgRating\">Average Rating: " + averageRating + "</p>")
+    }
 }
 
-function submitSearch(event) {   
+async function getResults(input) {
+    let search_url = "https://movie-database-imdb-alternative.p.rapidapi.com/?page=1&r=json&s=" + input;
+    const result = await axios({
+        method: 'GET',
+        url: search_url,
+        async: true, // might not need this.
+        crossDomain: true,
+        headers: {
+            "x-rapidapi-host": "movie-database-imdb-alternative.p.rapidapi.com",
+		    "x-rapidapi-key": "efefb9429cmsh849d8389675588ap137245jsndaead439332c"
+        }
+    });
+    return result;
+    // result is currently wrapped inside a promise.
+};
+
+async function submitSearch(event) {
+    // Used for deleting items
+    // auth = "Bearer " + jwt
+    // const result = await axios ({
+    //     method: 'delete',
+    //     url: 'http://localhost:3000/private/movies/Batman Begins',
+    //     data: {
+    //         data: {
+    //             ratings: "3"
+    //         }
+    //     },
+    //     headers: { Authorization: auth }
+    // })
+
     var input = document.getElementById("search-bar").value;
     let result = getResults(input);
     goToSearchResultsPage(event, result);
@@ -285,27 +337,10 @@ $(function () {
     // Home page
     $root.on("click", "#search-button", submitSearch);
     $root.on("click", "#submit-rating-button", submitRating);
-    $root.on("click", "#see-average-rating-button", seeAverageRating);
+    $root.on("click", ".see-average-rating-button", seeAverageRating);
     $root.on("click", "#account-info-button", goToAccountInfoPage);
     $root.on("click", "#logout-button", logout);
 
     // Account Info and Search Results pages
     $root.on("click", "#back-to-home-button", goToHomePage);
-}) 
-
-async function getResults(input) {
-    let search_url = "https://movie-database-imdb-alternative.p.rapidapi.com/?page=1&r=json&s=" + input;
-    const result = await axios({
-        method: 'GET',
-        url: search_url,
-        async: true, // might not need this.
-        crossDomain: true,
-        headers: {
-            "x-rapidapi-host": "movie-database-imdb-alternative.p.rapidapi.com",
-		    "x-rapidapi-key": "efefb9429cmsh849d8389675588ap137245jsndaead439332c"
-        }
-
-    });
-    return result;
-    // result is currently wrapped inside a promise.
-};
+})

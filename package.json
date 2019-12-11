@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/sean1000444/426FinalProject/issues"
   },
-  "homepage": "https://github.com/sean1000444/426FinalProject#readme"
+  "homepage": "https://github.com/sean1000444/426FinalProject#readme",
+  "dependencies": {
+    "autocompleter": "^5.2.0",
+    "axios": "^0.19.0"
+  }
 }

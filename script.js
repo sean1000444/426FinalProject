@@ -21,14 +21,29 @@ async function goToLoginPage(event) {
     );
 }
 
-function goToSearchResultsPage(event) {
+function goToSearchResultsPage(event, results) {
+    // results should be a promise. Event included to grab user id?
     $("#root").empty().append(
-        "Search Results Page (Maybe have this pop up so we don't lose the search) <br>" +
-        "<button id=\"back-to-home-button\">Back to Home Page</button><br>" +
-        "<a href=\"resultPage.html\">Result Page 1 Link</a><br>" +
-        "<a href=\"resultPage.html\">Result Page 2 Link</a><br>" +
-        "<a href=\"resultPage.html\">Result Page 3 Link</a><br>"
+        "<h1>Search Results</h1>"
     );
+    results.then(result => {
+        console.log(result);
+        renderAllResults(result.data.Search);
+    })
+}
+
+const renderAllResults = function (result) {
+    result.forEach(function (element) {
+        $('#root').append(renderResultWidget(element));
+    })
+}
+
+const renderResultWidget = function (result) {
+    // search result widget - needs to contain name of movie, year?, and pic
+    let search_result = `<div class = "resultbox">
+    <p>${result.Title}</p>
+</div>`;
+    return search_result;
 }
 
 async function seeAvailableMovies() {
@@ -166,10 +181,7 @@ async function submitNewAccountInfo(event) {
     goToLoginPage();
 }
 
-function submitSearch(event) {
-    // Get info and use it to augment the following function
-    goToSearchResultsPage();
-}
+
 
 async function submitRating(event) {
     movieName = "The Shawshank Redemption" // Get the info from the thing being rated
@@ -225,10 +237,12 @@ async function seeAverageRating(event) {
     console.log()
 }
 
-function submitSearch(event) {
-    // Get info and use it to augment the following function
-    goToSearchResultsPage();
+function submitSearch(event) {   
+    var input = document.getElementById("search-bar").value;
+    let result = getResults(input);
+    goToSearchResultsPage(event, result);
 }
+
 
 function logout(event) {
     jwt = "Logged Out";
@@ -266,3 +280,21 @@ $(function () {
     // Account Info and Search Results pages
     $root.on("click", "#back-to-home-button", goToHomePage);
 }) 
+
+async function getResults(input) {
+    console.log("Input: " + input)
+    let search_url = "https://movie-database-imdb-alternative.p.rapidapi.com/?page=1&r=json&s=" + input;
+    const result = await axios({
+        method: 'GET',
+        url: search_url,
+        async: true, // might not need this.
+        crossDomain: true,
+        headers: {
+            "x-rapidapi-host": "movie-database-imdb-alternative.p.rapidapi.com",
+		    "x-rapidapi-key": "efefb9429cmsh849d8389675588ap137245jsndaead439332c"
+        }
+
+    });
+    return result;
+    // result is currently wrapped inside a promise.
+};

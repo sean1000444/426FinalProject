@@ -24,25 +24,33 @@ async function goToLoginPage(event) {
 function goToSearchResultsPage(event, results) {
     // results should be a promise. Event included to grab user id?
     $("#root").empty().append(
-        "<h1>Search Results</h1>"
+        '<h2>Search Results</h2>' + 
+        '<br>'
     );
     results.then(result => {
-        console.log(result);
         renderAllResults(result.data.Search);
+
+        // event handlers for things involving the results.
+        $(document).on('click', '.rating-button', submitRating);
     })
 }
-
+let ctr;
 const renderAllResults = function (result) {
+    ctr = 0;
     result.forEach(function (element) {
         $('#root').append(renderResultWidget(element));
     })
 }
-
+//<img src = ${result.Poster} - this is the code to add the image. For some reason, it was covering up the input field.
 const renderResultWidget = function (result) {
     // search result widget - needs to contain name of movie, year?, and pic
-    let search_result = `<div class = "resultbox">
-    <p>${result.Title}</p>
+    let search_result = `<div class = "resultbox" id = "${result.Title}">
+    <p>${result.Title} - ${result.Year}</p>
+    <input class=\"rating-input\" type=\"text\" placeholder=\"0 to 5\">
+    <button class=\"rating-button\" id = "${ctr}">Submit</button> <br>
 </div>`;
+console.log(ctr);
+    ctr++;
     return search_result;
 }
 
@@ -184,8 +192,12 @@ async function submitNewAccountInfo(event) {
 
 
 async function submitRating(event) {
-    movieName = "The Shawshank Redemption" // Get the info from the thing being rated
-    movieRating = 5
+    let idnum = $(event.target).attr('id');
+    console.log(idnum);
+    movieName = $(event.target).closest(".resultbox").attr('id'); // the id associated with each result is the movie name. Can change if need
+    console.log(movieName);
+    movieRating = document.getElementsByClassName('rating-input')[idnum].value;
+    console.log(movieRating);
     auth = "Bearer " + jwt
 
     // Update user's info
@@ -282,7 +294,6 @@ $(function () {
 }) 
 
 async function getResults(input) {
-    console.log("Input: " + input)
     let search_url = "https://movie-database-imdb-alternative.p.rapidapi.com/?page=1&r=json&s=" + input;
     const result = await axios({
         method: 'GET',

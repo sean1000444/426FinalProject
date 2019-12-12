@@ -26,11 +26,11 @@ async function goToLoginPage(event) {
 let ctr;
 const renderResultWidget = function (result) {
     // search result widget - needs to contain name of movie, year?, and pic
-    let search_result = `<div class = "resultbox" id = "${result.Title}">
-    <h3 class=\"resultTitle\">${result.Title} - ${result.Year}</h3>
+    let search_result = `<div class="content" "resultbox" id = "${result.Title}">
+    <h4 class=\"resultTitle\">${result.Title} - ${result.Year}</h4>
     <input class=\"rating-input\" type=\"text\" placeholder=\"0 to 5\">
-    <button class = "button is-primary" class=\"rating-button\" id = "${ctr}">Submit</button>
-    <button class = "button is-info" class=\"see-average-rating-button\">See Average Rating</button> <br>
+    <button class = \"button is-primary\" class=\"rating-button\" id = "${ctr}">Submit</button>
+    <button class = \"button is-info\" class=\"see-average-rating-button\">See Average Rating</button> <br>
     </div>`;
     // console.log(ctr);
     ctr++;
@@ -39,27 +39,29 @@ const renderResultWidget = function (result) {
 
 const renderAllResults = function (result) {
     ctr = 0;
+    $('#root').append('<div id="hi" class="container"></div>');
     result.forEach(function (element) {
-        $('#root').append(renderResultWidget(element));
+        $('#hi').append(renderResultWidget(element));
     })
 }
 
-function goToSearchResultsPage(event, results) {
+async function goToSearchResultsPage(event, results) {
     // results should be a promise. Event included to grab user id?
     $("#root").empty().append(
-        '<div class = "container>' +
+        '<div class = "container">' +
         '<div class = "content"><h2>Search Results</h2> </div>' + 
         '<button id=\"back-to-home-button\" class = "button is-link">Back to Home Page</button><br>' +
         '<br>' +
         '</div>'
 
     );
-    results.then(result => {
+    await results.then(result => {
         renderAllResults(result.data.Search);
 
         // event handlers for things involving the results.
         $(document).on('click', '.rating-button', submitRating);
     })
+
 }
 
 async function seeAvailableMovies() {
@@ -321,6 +323,7 @@ async function submitSearch(event) {
     var input = document.getElementById("search-bar").value;
     let result = getResults(input);
     goToSearchResultsPage(event, result);
+
 }
 
 

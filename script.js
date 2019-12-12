@@ -70,11 +70,11 @@ async function seeAvailableMovies() {
 
     if ($("#root").find("#movieContainer").length == 0) {
         $("#root").append(
-            "<div id=\"movieContainer\"></div>"
+            "<div class=\"container\" id=\"movieContainer\"></div>"
         )
         availableMovies.forEach(movie => {
             $("#movieContainer").append(
-                "<div>" + movie + "</div>"
+                "<div class=\"content\"><h5>" + movie + "</h5></div>"
             )
         });
     }
@@ -84,9 +84,11 @@ async function goToAccountInfoPage() {
     auth = "Bearer " + jwt
 
     $("#root").empty().append(
-        "Account Info Page<br>" +
-        "<p>Current User: " + first + " " + last + "<\p>" +
-        "<button id=\"back-to-home-button\">Back to Home Page</button><br>"
+        "<div class=\"container\">" +
+        "<div class=\"content\"><h2>Account Info Page</h2></div>" +
+        "<div class=\"content\"><h4>Current User: " + first + " " + last + "</h1></div>" +
+        "<button class=\"button is-info\" id=\"back-to-home-button\">Back to Home Page</button><br>" +
+        "</div>"
     );
     
     try {
@@ -104,12 +106,12 @@ async function goToAccountInfoPage() {
         let userRatingsKeysInfo = userRatingsKeys['data']['result']
 
         $("#root").append(
-            "Your ratings: <br>"
+            "<div class=\"content\"><h5>Your ratings:</h5></div>"
         )
 
         userRatingsKeysInfo.forEach(key => {
             $("#root").append(
-                key + ": " + userRatingsInfo[key]['rating'] + "<br>"
+                "<div class=\"content\"><h6>" + key + ": " + userRatingsInfo[key]['rating'] + "</h6></div>"
             )
         });
     } catch {
@@ -147,15 +149,15 @@ function goToHomePage() {
 
 function goToCreateNewAccountPage(event) {
     $("#root").empty().append(
-        "New Account Page<br>" +
-        "<form>" +
-        "<input id=\"first\" type=\"text\" placeholder=\"First Name\"><br>" +
-        "<input id=\"last\" type=\"text\" placeholder=\"Last Name\"><br>" +
-        "<input id=\"email\" type=\"text\" placeholder=\"Email\"><br>" +
-        "<input id=\"pass\" type=\"text\" placeholder=\"Password\"><br>" +
-        "</form>" +
-        "<button id=\"submit-new-account-info\" type=\"button\">Create New Account</button> <br>" +
-        "<button id=\"back-to-login-page\">Go Back to Login Page</button>"
+        "<div class=\"container\">" +
+        "<div class=\"content\"><h2>New Account Page</h2></div>" +
+        "<input class=\"input\" id=\"first\" type=\"text\" placeholder=\"First Name\"><br>" +
+        "<input class=\"input\" id=\"last\" type=\"text\" placeholder=\"Last Name\"><br>" +
+        "<input class=\"input\" id=\"email\" type=\"text\" placeholder=\"Email\"><br>" +
+        "<input class=\"input\" id=\"pass\" type=\"text\" placeholder=\"Password\"><br>" +
+        "<button class=\"button is-primary\" id=\"submit-new-account-info\" type=\"button\">Create New Account</button> <br>" +
+        "<button class=\"button is-info\" id=\"back-to-login-page\">Go Back to Login Page</button>" +
+        "</div>"
     );
 }
 

@@ -27,10 +27,10 @@ let ctr;
 const renderResultWidget = function (result) {
     // search result widget - needs to contain name of movie, year?, and pic
     let search_result = `<div class = "resultbox" id = "${result.Title}">
-    <p class=\"resultTitle\">${result.Title} - ${result.Year}</p>
+    <h3 class=\"resultTitle\">${result.Title} - ${result.Year}</h3>
     <input class=\"rating-input\" type=\"text\" placeholder=\"0 to 5\">
-    <button class=\"rating-button\" id = "${ctr}">Submit</button>
-    <button class=\"see-average-rating-button\">See Average Rating</button> <br>
+    <button class = "button is-primary" class=\"rating-button\" id = "${ctr}">Submit</button>
+    <button class = "button is-info" class=\"see-average-rating-button\">See Average Rating</button> <br>
     </div>`;
     // console.log(ctr);
     ctr++;
@@ -47,9 +47,12 @@ const renderAllResults = function (result) {
 function goToSearchResultsPage(event, results) {
     // results should be a promise. Event included to grab user id?
     $("#root").empty().append(
-        '<h2>Search Results</h2>' + 
-        '<button id=\"back-to-home-button\">Back to Home Page</button><br>' +
-        '<br>'
+        '<div class = "container>' +
+        '<div class = "content"><h2>Search Results</h2> </div>' + 
+        '<button id=\"back-to-home-button\" class = "button is-link">Back to Home Page</button><br>' +
+        '<br>' +
+        '</div>'
+
     );
     results.then(result => {
         renderAllResults(result.data.Search);

@@ -26,11 +26,11 @@ async function goToLoginPage(event) {
 let ctr;
 const renderResultWidget = function (result) {
     // search result widget - needs to contain name of movie, year?, and pic
-    let search_result = `<div class="content" "resultbox" id = "${result.Title}">
+    let search_result = `<div class="content resultbox" id = "${result.Title}">
     <h4 class=\"resultTitle\">${result.Title} - ${result.Year}</h4>
     <input class=\"rating-input\" type=\"text\" placeholder=\"0 to 5\">
-    <button class = \"button is-primary\" class=\"rating-button\" id = "${ctr}">Submit</button>
-    <button class = \"button is-info\" class=\"see-average-rating-button\">See Average Rating</button> <br>
+    <button class=\"button is-primary rating-button\" id="${ctr}">Submit</button>
+    <button class=\"button is-info see-average-rating-button\">See Average Rating</button> <br>
     </div>`;
     // console.log(ctr);
     ctr++;
@@ -355,7 +355,7 @@ $(function () {
 
     // Home page
     $root.on("click", "#search-button", submitSearch);
-    $root.on("click", "#submit-rating-button", submitRating);
+    $root.on("click", ".rating-button", submitRating);
     $root.on("click", ".see-average-rating-button", seeAverageRating);
     $root.on("click", "#account-info-button", goToAccountInfoPage);
     $root.on("click", "#logout-button", logout);

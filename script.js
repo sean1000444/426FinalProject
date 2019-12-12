@@ -9,15 +9,16 @@ async function getAllAuthors() {
 
 async function goToLoginPage(event) {
     $("#root").empty().append(
-        "Login Page <br>" +
-        "<div class=\"login-container\">" +
-        "<input id=\"username-field\" placeholder=\"Username\" name=\"username\"> <br>" +
-        "<input id=\"password-field\" placeholder=\"Password\" name=\"password\"> <br>" +
-        "<button id=\"submit-login-info\">Submit</button>" +
+        "<div class=\"container\">" +
+        "<div class=\"content\"><h2>Login Page</h2></div>" +
+        "<div class=\"login-container\", \"control\", class=\"columns\">" +
+        "<input class=\"input\" id=\"username-field\" placeholder=\"Username\" name=\"username\"> <br>" +
+        "<input class=\"input\" id=\"password-field\" placeholder=\"Password\" name=\"password\"> <br>" +
+        "<button class=\"button is-primary\" id=\"submit-login-info\">Submit</button>" +
         "</div>" +
-        "<button id=\"create-new-account\">Create New Account</button>" +
-        "<p>Currently logged in user: " + jwt + "</p>" +
-        "<button id=\"available-movies-button\">See Available Movies Sample</button>"
+        "<button class=\"button is-link\" id=\"create-new-account\">Create New Account</button><br>" +
+        "<button class=\"button is-info\" id=\"available-movies-button\">See Available Movies Sample</button>" +
+        "</div>"
     );
 }
 
@@ -118,11 +119,13 @@ async function goToAccountInfoPage() {
 
 function goToHomePage() {
     $("#root").empty().append(
-        "Home Page <br>" +
-        "<button id=\"account-info-button\">Account Info</button> <br>" +
-        "<button id=\"logout-button\">Logout</button> <br>" +
-        "<input id=\"search-bar\" type=\"text\" placeholder=\"Search\">" +
-        "<button id=\"search-button\">Submit</button> <br>"
+        "<div class=\"container\">" +
+        "<div class=\"content\"><h2>Home Page</h2></div>" +
+        "<button class=\"button is-info\" id=\"account-info-button\">Account Info</button> <br>" +
+        "<button class=\"button is-danger\" id=\"logout-button\">Logout</button> <br>" +
+        "<button class=\"button is-primary\" id=\"search-button\">Submit</button> <br>" +
+        "<input class=\"input\" id=\"search-bar\" type=\"text\" placeholder=\"Search\">" +
+        "</div>"
     );
     var countries = movieData;
     
